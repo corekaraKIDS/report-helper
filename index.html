@@ -49,6 +49,7 @@
     textarea.keyword { min-height:34px; height:34px; overflow-y:hidden; resize:none; }
     .keyword-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
     .keyword-row .field { min-width:0; }
+    .keyword-hint { margin:-1px 0 4px; color:#94a3b8; font-size:10px; line-height:1.3; }
     .progress-row { display:grid; grid-template-columns:max-content max-content; gap:18px; }
     .sub-label { color:var(--muted); font-size:11px; margin-bottom:4px; }
     .preview-wrap { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
@@ -80,9 +81,9 @@
           <div class="field material-field"><label for="materialTitle">教材タイトル</label><select id="materialTitle" name="materialTitle"><option value="">教材を選択してください</option></select></div>
           <fieldset><legend>進捗</legend><div class="progress-row"><div><div class="sub-label">開始時点</div><div class="choices" id="progressStarts"></div></div><div><div class="sub-label">終了時点</div><div class="choices" id="progressEnds"></div></div></div></fieldset>
           <div class="keyword-row">
-            <div class="field"><label for="logical">ロジカルのキーワード</label><textarea class="keyword" id="logical" name="logical" rows="1" placeholder="キーワードを入力"></textarea></div>
-            <div class="field"><label for="critical">クリティカルのキーワード</label><textarea class="keyword" id="critical" name="critical" rows="1" placeholder="キーワードを入力"></textarea></div>
-            <div class="field"><label for="creative">クリエイティブのキーワード</label><textarea class="keyword" id="creative" name="creative" rows="1" placeholder="キーワードを入力"></textarea></div>
+            <div class="field"><label for="logical">ロジカル（論理的思考力）</label><div class="keyword-hint">原因と結果、考察</div><textarea class="keyword" id="logical" name="logical" rows="1" placeholder="キーワードを入力"></textarea></div>
+            <div class="field"><label for="critical">クリティカル（批判的思考力）</label><div class="keyword-hint">気づき、発見、応用、模索</div><textarea class="keyword" id="critical" name="critical" rows="1" placeholder="キーワードを入力"></textarea></div>
+            <div class="field"><label for="creative">クリエイティブ（創造力）</label><div class="keyword-hint">工夫、発想、直感、選択の根拠</div><textarea class="keyword" id="creative" name="creative" rows="1" placeholder="キーワードを入力"></textarea></div>
           </div>
           <div class="footer-actions"><button type="button" class="danger" id="deleteStudent">この生徒を削除</button></div>
         </form>
