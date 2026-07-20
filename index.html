@@ -11,7 +11,9 @@
     body { margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; }
     .app { display:flex; flex-direction:column; width:min(1120px, calc(100% - 32px)); height:calc(100dvh - 20px); margin:10px auto; }
     header { display:flex; flex:none; justify-content:space-between; align-items:center; gap:16px; margin-bottom:8px; }
+    .header-title { display:flex; align-items:baseline; gap:10px; min-width:0; }
     h1 { font-size:20px; margin:0; }
+    .tab-usage-note { color:var(--muted); font-size:11px; white-space:nowrap; }
     .lead { margin:0; color:var(--muted); font-size:14px; }
     button { font:inherit; cursor:pointer; border-radius:8px; border:1px solid var(--line); background:white; padding:7px 12px; color:var(--ink); }
     button:hover { background:#f8fafc; }
@@ -66,7 +68,7 @@
 </head>
 <body>
   <main class="app">
-    <header><div><h1>授業記録作成支援ツール</h1></div><button type="button" class="danger" id="resetAll">入力データをリセット</button></header>
+    <header><div class="header-title"><h1>授業記録作成支援ツール</h1><small class="tab-usage-note">複数タブでの使用はサポートされていません。</small></div><button type="button" class="danger" id="resetAll">入力データをリセット</button></header>
     <nav class="tabs" id="tabs" aria-label="生徒"></nav>
     <section class="panel">
       <p class="csv-note" id="csvNote">教材一覧を読み込めませんでした。ローカルサーバーからこのページを開いてください。</p>
