@@ -39,11 +39,12 @@
     .choice input { position:absolute; opacity:0; pointer-events:none; }
     .choice span { display:block; border:1px solid #cbd5e1; border-radius:5px; padding:5px 11px; font-size:12px; cursor:pointer; }
     .choice input:checked + span { color:var(--blue); border-color:var(--blue); background:var(--blue-soft); font-weight:700; }
-    input[name="course"][value="ロボット"] + span { color:#991b1b; border-color:#991b1b; }
-    input[name="course"][value="ロボット"]:checked + span { color:white; background:#991b1b; border-color:#991b1b; }
-    input[name="course"][value="マイクラ"] + span { color:#166534; border-color:#166534; }
-    input[name="course"][value="マイクラ"]:checked + span { color:white; background:#166534; border-color:#166534; }
-    input[name="course"][value="Scratch"] + span { color:#b45309; border-color:#d97706; }
+    input[name="course"] + span { border-width:2px; }
+    input[name="course"][value="ロボット"] + span { color:#991b1b; background:#fef2f2; border-color:#991b1b; }
+    input[name="course"][value="ロボット"]:checked + span { color:white; background:#dc2626; border-color:#991b1b; }
+    input[name="course"][value="マイクラ"] + span { color:#166534; background:#f0fdf4; border-color:#166534; }
+    input[name="course"][value="マイクラ"]:checked + span { color:white; background:#15803d; border-color:#166534; }
+    input[name="course"][value="Scratch"] + span { color:#b45309; background:#fffbeb; border-color:#d97706; }
     input[name="course"][value="Scratch"]:checked + span { color:#422006; background:#fbbf24; border-color:#d97706; }
     textarea.keyword { min-height:34px; height:34px; overflow-y:hidden; resize:none; }
     .keyword-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
@@ -92,7 +93,7 @@
   <div class="toast" id="toast" role="status">コピーしました</div>
   <script>
     const STORAGE_KEY = 'lesson-report-helper-v1';
-    const courseIds = { 'ロボット':'2', 'マイクラ':'3', 'Scratch':'1' };
+    const courseIds = { 'ロボット':'2', 'マイクラ':'3', 'Scratch':'4' };
     const defaults = () => ({ id: crypto.randomUUID?.() || String(Date.now()+Math.random()), studentName:'', honorific:'くん', course:'ロボット', materialTitle:'', overview:'', progressStart:'続きから', progressEnd:'途中まで', logical:'', critical:'', creative:'' });
     let materials = [];
     let state = loadState();
