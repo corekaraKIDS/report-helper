@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>授業記録作成支援ツール</title>
+  <style>
+    :root { --blue:#2563eb; --blue-soft:#eff6ff; --line:#dbe3ee; --ink:#172033; --muted:#687386; --bg:#f5f7fb; --danger:#dc2626; }
+    * { box-sizing:border-box; }
+    html, body { height:100%; overflow:hidden; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; }
+    .app { display:flex; flex-direction:column; width:min(1120px, calc(100% - 32px)); height:calc(100dvh - 20px); margin:10px auto; }
+    header { display:flex; flex:none; justify-content:space-between; align-items:center; gap:16px; margin-bottom:8px; }
+    h1 { font-size:20px; margin:0; }
+    .lead { margin:0; color:var(--muted); font-size:14px; }
+    button { font:inherit; cursor:pointer; border-radius:8px; border:1px solid var(--line); background:white; padding:7px 12px; color:var(--ink); }
+    button:hover { background:#f8fafc; }
+    .primary { color:white; background:var(--blue); border-color:var(--blue); font-weight:700; }
+    .primary:hover { background:#1d4ed8; }
+    .tabs { display:flex; flex:none; gap:6px; align-items:end; overflow-x:auto; overflow-y:hidden; padding:0 2px; }
+    .tab { flex:0 0 auto; white-space:nowrap; border-bottom-left-radius:0; border-bottom-right-radius:0; color:var(--muted); }
+    .tab.active { color:var(--blue); border-color:var(--line); border-bottom-color:white; background:white; font-weight:700; position:relative; z-index:1; }
+    .add-tab { flex:0 0 auto; white-space:nowrap; border-style:dashed; color:var(--blue); }
+    .panel { flex:1; min-height:0; overflow:hidden; border:1px solid var(--line); background:white; border-radius:0 12px 12px 12px; padding:14px 20px; box-shadow:0 8px 24px rgba(32,50,80,.05); }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); gap:24px; height:100%; min-height:0; }
+    #form { min-height:0; overflow-y:auto; padding-right:10px; }
+    h2 { margin:0 0 12px; font-size:16px; }
+    .field { margin-bottom:11px; }
+    .material-field { width:min(100%,380px); }
+    .student-row { display:grid; grid-template-columns:minmax(150px,220px) 1fr; gap:22px; align-items:start; }
+    .student-row .field, .student-row fieldset { margin-bottom:11px; }
+    label, legend { display:block; margin-bottom:4px; font-size:12px; font-weight:700; }
+    input[type="text"], select, textarea { width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:7px 9px; font-size:13px; color:inherit; background:white; }
+    textarea { min-height:110px; resize:vertical; line-height:1.65; }
+    input:focus, select:focus, textarea:focus { outline:3px solid #dbeafe; border-color:var(--blue); }
+    fieldset { margin:0 0 11px; padding:0; border:0; }
+    .choices { display:flex; flex-wrap:wrap; gap:6px; }
+    .choice { position:relative; }
+    .choice input { position:absolute; opacity:0; pointer-events:none; }
+    .choice span { display:block; border:1px solid #cbd5e1; border-radius:5px; padding:5px 11px; font-size:12px; cursor:pointer; }
+    .choice input:checked + span { color:var(--blue); border-color:var(--blue); background:var(--blue-soft); font-weight:700; }
+    input[name="course"][value="ロボット"] + span { color:#991b1b; border-color:#991b1b; }
+    input[name="course"][value="ロボット"]:checked + span { color:white; background:#991b1b; border-color:#991b1b; }
+    input[name="course"][value="マイクラ"] + span { color:#166534; border-color:#166534; }
+    input[name="course"][value="マイクラ"]:checked + span { color:white; background:#166534; border-color:#166534; }
+    input[name="course"][value="Scratch"] + span { color:#b45309; border-color:#d97706; }
+    input[name="course"][value="Scratch"]:checked + span { color:#422006; background:#fbbf24; border-color:#d97706; }
+    textarea.keyword { min-height:34px; height:34px; overflow-y:hidden; resize:none; }
+    .keyword-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .keyword-row .field { min-width:0; }
+    .progress-row { display:grid; grid-template-columns:max-content max-content; gap:18px; }
+    .sub-label { color:var(--muted); font-size:11px; margin-bottom:4px; }
+    .preview-wrap { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+    .preview-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+    .preview-head h2 { margin:0; }
+    #output { flex:1; min-height:0; margin:0; padding:18px; border:1px solid var(--line); border-radius:10px; background:#f8fafc; white-space:pre-wrap; overflow-wrap:anywhere; overflow-y:auto; font:13px/1.8 ui-monospace,SFMono-Regular,Consolas,"Noto Sans Mono CJK JP",monospace; }
+    .footer-actions { display:flex; align-items:center; margin-top:8px; }
+    .danger { color:var(--danger); border-color:#fecaca; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); padding:10px 18px; border-radius:999px; background:#172033; color:white; opacity:0; transition:.2s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .csv-note { display:none; margin:0 0 16px; padding:10px; color:#92400e; background:#fffbeb; border-radius:8px; font-size:13px; }
+    @media (max-width:800px) { .app{width:min(100% - 20px,700px);height:calc(100dvh - 12px);margin:6px auto}.layout{grid-template-columns:1fr 1fr;overflow-x:auto}.layout>*{min-width:310px}.panel{padding:14px}.progress-row{grid-template-columns:1fr}.student-row{grid-template-columns:minmax(120px,170px) 1fr;gap:12px} }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header><div><h1>授業記録作成支援ツール</h1></div><button type="button" class="danger" id="resetAll">入力データをリセット</button></header>
+    <nav class="tabs" id="tabs" aria-label="生徒"></nav>
+    <section class="panel">
+      <p class="csv-note" id="csvNote">教材一覧を読み込めませんでした。ローカルサーバーからこのページを開いてください。</p>
+      <div class="layout">
+        <form id="form" autocomplete="off">
+          <h2>授業内容</h2>
+          <div class="student-row">
+            <div class="field"><label for="studentName">生徒名</label><input id="studentName" name="studentName" type="text"></div>
+            <fieldset><legend>呼び方</legend><div class="choices" id="honorifics"></div></fieldset>
+          </div>
+          <fieldset><legend>コース</legend><div class="choices" id="courses"></div></fieldset>
+          <div class="field material-field"><label for="materialTitle">教材タイトル</label><select id="materialTitle" name="materialTitle"><option value="">教材を選択してください</option></select></div>
+          <fieldset><legend>進捗</legend><div class="progress-row"><div><div class="sub-label">開始時点</div><div class="choices" id="progressStarts"></div></div><div><div class="sub-label">終了時点</div><div class="choices" id="progressEnds"></div></div></div></fieldset>
+          <div class="keyword-row">
+            <div class="field"><label for="logical">ロジカルのキーワード</label><textarea class="keyword" id="logical" name="logical" rows="1" placeholder="キーワードを入力"></textarea></div>
+            <div class="field"><label for="critical">クリティカルのキーワード</label><textarea class="keyword" id="critical" name="critical" rows="1" placeholder="キーワードを入力"></textarea></div>
+            <div class="field"><label for="creative">クリエイティブのキーワード</label><textarea class="keyword" id="creative" name="creative" rows="1" placeholder="キーワードを入力"></textarea></div>
+          </div>
+          <div class="footer-actions"><button type="button" class="danger" id="deleteStudent">この生徒を削除</button></div>
+        </form>
+        <aside class="preview-wrap"><div class="preview-head"><h2>出力プレビュー</h2><button type="button" class="primary" id="copy">コピー</button></div><pre id="output"></pre></aside>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status">コピーしました</div>
+  <script>
+    const STORAGE_KEY = 'lesson-report-helper-v1';
+    const courseIds = { 'ロボット':'2', 'マイクラ':'3', 'Scratch':'1' };
+    const defaults = () => ({ id: crypto.randomUUID?.() || String(Date.now()+Math.random()), studentName:'', honorific:'くん', course:'ロボット', materialTitle:'', overview:'', progressStart:'続きから', progressEnd:'途中まで', logical:'', critical:'', creative:'' });
+    let materials = [];
+    let state = loadState();
+    if (!state.students?.length) state = { students:[defaults()], activeId:null };
+    state.activeId ||= state.students[0].id;
+
+    const $ = id => document.getElementById(id);
+    function loadState(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+    function active(){ return state.students.find(s=>s.id===state.activeId) || state.students[0]; }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function escapeHtml(s){ return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+    function radioGroup(target, name, values){ $(target).innerHTML=values.map(v=>`<label class="choice"><input type="radio" name="${name}" value="${v}"><span>${v}</span></label>`).join(''); }
+    radioGroup('honorifics','honorific',['くん','ちゃん','さん']);
+    radioGroup('courses','course',['ロボット','マイクラ','Scratch']);
+    radioGroup('progressStarts','progressStart',['続きから','初めから']);
+    radioGroup('progressEnds','progressEnd',['途中まで','完成']);
+
+    function parseCSV(text){
+      const rows=[]; let row=[], cell='', quoted=false;
+      for(let i=0;i<text.length;i++){ const c=text[i], n=text[i+1];
+        if(c==='"' && quoted && n==='"'){cell+='"';i++;}
+        else if(c==='"'){quoted=!quoted;}
+        else if(c===',' && !quoted){row.push(cell);cell='';}
+        else if((c==='\n'||c==='\r') && !quoted){ if(c==='\r'&&n==='\n')i++; row.push(cell); if(row.some(x=>x!==''))rows.push(row); row=[];cell=''; }
+        else cell+=c;
+      }
+      if(cell||row.length){row.push(cell);rows.push(row);}
+      const headers=rows.shift()?.map(h=>h.replace(/^\uFEFF/,''))||[];
+      return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??''])));
+    }
+    async function loadMaterials(){
+      try { const res=await fetch('./contents.csv', { cache:'no-store' }); if(!res.ok)throw Error(); materials=parseCSV(await res.text()).map(m=>({...m,overview:(m.overview||'').replace(/[\r\n]+/g,'')})); $('csvNote').style.display='none'; }
+      catch { $('csvNote').style.display='block'; }
+      if(materials.length){state.students.forEach(s=>{const m=materials.find(x=>x.course_id===courseIds[s.course]&&x.content_title===s.materialTitle);if(m)s.overview=m.overview;});save();updateOutput();}
+      updateMaterialOptions();
+    }
+    function renderTabs(){
+      $('tabs').innerHTML=state.students.map(s=>`<button type="button" class="tab ${s.id===state.activeId?'active':''}" data-id="${s.id}">${escapeHtml(s.studentName||'名前未入力')}</button>`).join('')+'<button type="button" class="add-tab" id="addStudent">＋ 新しい生徒</button>';
+      document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.activeId=b.dataset.id;save();render();});
+      $('addStudent').onclick=()=>{const s=defaults();state.students.push(s);state.activeId=s.id;save();render();$('studentName').focus();};
+    }
+    function updateMaterialOptions(){
+      const s=active(), id=courseIds[s.course], list=materials.filter(m=>m.course_id===id);
+      $('materialTitle').innerHTML='<option value="">教材を選択してください</option>'+list.map(m=>`<option value="${escapeHtml(m.content_title)}">${escapeHtml(m.content_title)}</option>`).join('');
+      $('materialTitle').value=s.materialTitle;
+    }
+    function resizeKeyword(el){ el.style.height='34px'; el.style.height=Math.max(34,el.scrollHeight)+'px'; }
+    function render(){
+      const s=active(); renderTabs();
+      ['studentName','logical','critical','creative'].forEach(k=>$(k).value=s[k]||'');
+      document.querySelectorAll('.keyword').forEach(resizeKeyword);
+      ['honorific','course','progressStart','progressEnd'].forEach(k=>{const el=document.querySelector(`input[name="${k}"][value="${CSS.escape(s[k])}"]`);if(el)el.checked=true;});
+      updateMaterialOptions(); updateOutput();
+      $('deleteStudent').style.visibility=state.students.length>1?'visible':'hidden';
+    }
+    function updateOutput(){ const s=active(); $('output').textContent=`生徒名：${s.studentName}\n呼び方：${s.honorific}\nコース：${s.course}\n教材タイトル：${s.materialTitle}\nテキストの概要：${s.overview}\n進捗：${s.progressStart}-${s.progressEnd}\nロジカルのキーワード：${s.logical}\nクリティカルのキーワード：${s.critical}\nクリエイティブのキーワード：${s.creative}`; }
+    $('form').addEventListener('input',e=>{
+      const s=active(), key=e.target.name; if(!key)return; s[key]=e.target.value;
+      if(key==='course'){s.materialTitle='';s.overview='';updateMaterialOptions();}
+      if(key==='materialTitle'){const m=materials.find(x=>x.course_id===courseIds[s.course]&&x.content_title===s.materialTitle);s.overview=m?.overview||'';}
+      if(e.target.classList.contains('keyword'))resizeKeyword(e.target);
+      save(); renderTabs(); updateOutput();
+    });
+    $('copy').onclick=async()=>{ try { await navigator.clipboard.writeText($('output').textContent); } catch { const r=document.createRange();r.selectNode($('output'));getSelection().removeAllRanges();getSelection().addRange(r);document.execCommand('copy');getSelection().removeAllRanges(); } $('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1600); };
+    $('deleteStudent').onclick=()=>{const s=active();if(!confirm(`${s.studentName||'この生徒'}のデータを削除しますか？`))return;state.students=state.students.filter(x=>x.id!==s.id);state.activeId=state.students[0].id;save();render();};
+    $('resetAll').onclick=()=>{if(!confirm('入力データを破棄します。よろしいですか？'))return;localStorage.removeItem(STORAGE_KEY);const s=defaults();state={students:[s],activeId:s.id};save();render();};
+    render(); loadMaterials();
+  </script>
+</body>
+</html>
